@@ -147,7 +147,7 @@ $ curl -v http://localhost:4221/abcdefg
 HTTP/1.1 404 Not Found\r\n\r\n
 ```
 
-- Then, the tester will send a `GET` request, with the path `/`:
+- Then, the tester will send a `GET` request, with the path `/index.html`:
 ```bash
 $ curl -v http://localhost:4221
 ```
