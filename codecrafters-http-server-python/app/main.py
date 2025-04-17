@@ -39,6 +39,24 @@ def main():
 
 
     # task 4
+    # client_conn, address = server_socket.accept()
+    # raw_request = client_conn.recv(4096).decode()
+    # print(f"raw_request: {raw_request}")
+    # request = raw_request.split(" ")
+    # request_path = request[1].split("/")
+    # response = "HTTP/1.1 404 Not Found\r\n\r\n"
+    # if (request[0] == "GET") & (request[1] == "/"):
+    #     response = "HTTP/1.1 200 OK\r\n\r\n"
+    # elif (request[0] == "GET") & (request_path[1] == "echo"):
+    #     request_msg = request_path[2]
+    #     response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(request_msg)}\r\n\r\n{request_msg}"
+    # print(f"request: {request}")
+    # print(f"request_path: {request_path}")
+    # print(f"response: {response}")
+    # client_conn.sendall(response.encode())
+
+
+    # task 5
     client_conn, address = server_socket.accept()
     raw_request = client_conn.recv(4096).decode()
     print(f"raw_request: {raw_request}")
@@ -50,10 +68,17 @@ def main():
     elif (request[0] == "GET") & (request_path[1] == "echo"):
         request_msg = request_path[2]
         response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(request_msg)}\r\n\r\n{request_msg}"
+    elif (request[0] == "GET") & (request[1] == "/user-agent"):
+        # print([n.split(" ") for n in raw_request.splitlines()[1:-1]])
+        # print({ n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] })
+        headers = { n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] }
+        user_agent = headers['User-Agent']
+        response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
     print(f"request: {request}")
     print(f"request_path: {request_path}")
     print(f"response: {response}")
     client_conn.sendall(response.encode())
+
 
 if __name__ == "__main__":
     main()
