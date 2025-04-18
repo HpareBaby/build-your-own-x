@@ -213,6 +213,64 @@ def main():
     
 
     # task 9
+    # from concurrent.futures import ThreadPoolExecutor
+    # def handle_client(client_conn):
+    #     with client_conn:
+    #         raw_request = client_conn.recv(4096).decode()
+    #         print(f"raw_request: {raw_request}")
+    #         request = raw_request.split(" ")
+    #         request_path = request[1].split("/")
+    #         response = "HTTP/1.1 404 Not Found\r\n\r\n"
+    #         # print(f"request: {request}")
+    #         # print(f"request_path: {request_path}")
+    #         # print("raw_request: {}".format(raw_request.splitlines()))
+    #         headers = { n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] if len(n) > 1}
+    #         # print(f"headers: {headers}")
+    #         content_encoding = headers.get('Accept-Encoding')
+    #         ce_response = "\r\n"
+    #         if content_encoding == "gzip":
+    #             ce_response = "\r\nContent-Encoding: gzip\r\n"
+            
+    #         if (request[0] == "GET") & (request[1] == "/"):
+    #             response = "HTTP/1.1 200 OK\r\n\r\n"
+    #         elif (request[0] == "GET") & (request_path[1] == "echo"):
+    #             request_msg = request_path[2]
+    #             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain{ce_response}Content-Length: {len(request_msg)}\r\n\r\n{request_msg}"
+    #         elif (request[0] == "GET") & (request[1] == "/user-agent"):
+    #             user_agent = headers['User-Agent']
+    #             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain{ce_response}Content-Length: {len(user_agent)}\r\n\r\n{user_agent}"
+    #         elif (request_path[1] == "files"):
+    #             print("args: {}".format(sys.argv))
+    #             dir_path = sys.argv[2] if len(sys.argv) > 2 else ''
+    #             file_path = "{}{}".format(dir_path, request_path[2])
+    #             print(f"dir_path: {dir_path}")
+    #             if (request[0] == "GET"):
+    #                 try:
+    #                     with open(file_path, 'r') as f:
+    #                         content = f.read()
+    #                         length = len(content)
+    #                         print(f"content: {content}; length: {length}")
+    #                     response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream{ce_response}Content-Length: {length}\r\n\r\n{content}"
+    #                 except Exception as e:
+    #                     print(e)
+    #             elif (request[0] == "POST"):
+    #                 content = raw_request.splitlines()[-1]
+    #                 print(f"content: {content}")
+    #                 try:
+    #                     with open(file_path, 'w') as f:
+    #                         f.write(content)
+    #                     response = "HTTP/1.1 201 Created\r\n\r\n"
+    #                 except Exception as e:
+    #                     print(e)
+    #         print(f"response: {response}")
+    #         client_conn.sendall(response.encode())
+    # with ThreadPoolExecutor(max_workers=10) as pool:
+    #     while True:
+    #         client_conn, _ = server_socket.accept()
+    #         pool.submit(handle_client, client_conn)
+
+
+    # task 10 
     from concurrent.futures import ThreadPoolExecutor
     def handle_client(client_conn):
         with client_conn:
@@ -221,16 +279,13 @@ def main():
             request = raw_request.split(" ")
             request_path = request[1].split("/")
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
-            # print(f"request: {request}")
-            # print(f"request_path: {request_path}")
-            # print("raw_request: {}".format(raw_request.splitlines()))
-            headers = { n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] if len(n) > 1}
-            # print(f"headers: {headers}")
+            headers = { n.split(": ")[0]: n.split(": ")[1] for n in raw_request.splitlines()[1:-1] if len(n) > 1}
             content_encoding = headers.get('Accept-Encoding')
+            content_encoding = [i.strip() for i in content_encoding.split(",")] if content_encoding is not None else []
+            print(f"content_encoding: {content_encoding}")
             ce_response = "\r\n"
-            if content_encoding == "gzip":
+            if "gzip" in content_encoding:
                 ce_response = "\r\nContent-Encoding: gzip\r\n"
-            
             if (request[0] == "GET") & (request[1] == "/"):
                 response = "HTTP/1.1 200 OK\r\n\r\n"
             elif (request[0] == "GET") & (request_path[1] == "echo"):
