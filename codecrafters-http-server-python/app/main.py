@@ -111,6 +111,51 @@ def main():
     
 
     # task 7 
+    # from concurrent.futures import ThreadPoolExecutor
+    # def handle_client(client_conn):
+    #     with client_conn:
+    #         raw_request = client_conn.recv(4096).decode()
+    #         print(f"raw_request: {raw_request}")
+    #         request = raw_request.split(" ")
+    #         request_path = request[1].split("/")
+    #         response = "HTTP/1.1 404 Not Found\r\n\r\n"
+    #         if (request[0] == "GET") & (request[1] == "/"):
+    #             response = "HTTP/1.1 200 OK\r\n\r\n"
+    #         elif (request[0] == "GET") & (request_path[1] == "echo"):
+    #             request_msg = request_path[2]
+    #             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(request_msg)}\r\n\r\n{request_msg}"
+    #         elif (request[0] == "GET") & (request[1] == "/user-agent"):
+    #             # print([n.split(" ") for n in raw_request.splitlines()[1:-1]])
+    #             # print({ n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] })
+    #             headers = { n.split(": ")[0]: n.split(" ")[1] for n in raw_request.splitlines()[1:-1] }
+    #             user_agent = headers['User-Agent']
+    #             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
+    #         elif (request[0] == "GET") & (request_path[1] == "files"):
+    #             # file_path = "/tmp/{}".format(request_path[2])
+    #             # args = sys.argv[1:]
+    #             print("args: {}".format(sys.argv))
+    #             dir_path = sys.argv[2] if len(sys.argv) > 2 else ''
+    #             file_path = "{}{}".format(dir_path, request_path[2])
+    #             print(f"dir_path: {dir_path}")
+    #             try:
+    #                 with open(file_path, 'r') as f:
+    #                     content = f.read()
+    #                     length = len(content)
+    #                     print(f"content: {content}; length: {length}")
+    #                 response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {length}\r\n\r\n{content}"
+    #             except Exception as e:
+    #                 print(e)
+    #         print(f"request: {request}")
+    #         print(f"request_path: {request_path}")
+    #         print(f"response: {response}")
+    #         client_conn.sendall(response.encode())
+    # with ThreadPoolExecutor(max_workers=10) as pool:
+    #     while True:
+    #         client_conn, _ = server_socket.accept()
+    #         pool.submit(handle_client, client_conn)
+
+
+    # task 8 
     from concurrent.futures import ThreadPoolExecutor
     def handle_client(client_conn):
         with client_conn:
@@ -143,6 +188,18 @@ def main():
                         length = len(content)
                         print(f"content: {content}; length: {length}")
                     response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {length}\r\n\r\n{content}"
+                except Exception as e:
+                    print(e)
+            elif (request[0] == "POST") & (request_path[1] == "files"):
+                print("args: {}".format(sys.argv))
+                dir_path = sys.argv[2] if len(sys.argv) > 2 else ''
+                file_path = "{}{}".format(dir_path, request_path[2])
+                content = raw_request.splitlines()[-1]
+                print(f"content: {content}")
+                try:
+                    with open(file_path, 'w') as f:
+                        f.write(content)
+                    response = "HTTP/1.1 201 Created\r\n\r\n"
                 except Exception as e:
                     print(e)
             print(f"request: {request}")
