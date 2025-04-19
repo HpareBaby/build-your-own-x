@@ -389,6 +389,73 @@ def main():
 
 
     # task 12
+    # from concurrent.futures import ThreadPoolExecutor
+    # import gzip 
+
+    # def handle_client(client_conn):
+    #     def encode_response(content: str, use_gzip: bool=False):
+    #         content = content.encode()
+    #         header = f"Content-Length: {len(content)}\r\n"
+    #         if use_gzip:
+    #             content = gzip.compress(content)
+    #             header = f"Content-Encoding: gzip\r\nContent-Length: {len(content)}\r\n"
+    #         return header, content
+    #     close_conn = False
+    #     while not close_conn:
+    #     # with client_conn:
+    #         raw_request = client_conn.recv(4096).decode()
+    #         print(f"raw_request: {raw_request}")
+    #         request = raw_request.split(" ")
+    #         request_path = request[1].split("/")
+    #         header = "HTTP/1.1 404 Not Found\r\n\r\n"
+    #         response_body = b""
+    #         headers = { n.split(": ")[0]: n.split(": ")[1] for n in raw_request.splitlines()[1:] if ": " in n }
+    #         content_encoding = headers.get('Accept-Encoding')
+    #         content_encoding = [i.strip() for i in content_encoding.split(",")] if content_encoding else []
+
+    #         close_conn = True if headers.get('Connection') == 'close' else False
+    #         # print(f"content_encoding: {content_encoding}")
+    #         use_gzip = True if "gzip" in content_encoding else False
+    #         print(f"request: {request}; request_path: {request_path}; headers: {headers}; content_encoding: {content_encoding}; close_conn: {close_conn}; use_gzip: {use_gzip}")
+    #         if (request[0] == "GET") & (request[1] == "/"):
+    #             header = "HTTP/1.1 200 OK\r\n\r\n"
+    #         elif (request[0] == "GET") & (request_path[1] == "echo"):
+    #             header, response_body = encode_response(request_path[2], use_gzip)
+    #             header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}\r\n"
+    #         elif (request[0] == "GET") & (request[1] == "/user-agent"):
+    #             header, response_body = encode_response(headers['User-Agent'], use_gzip)
+    #             header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}\r\n"
+    #         elif (request_path[1] == "files"):
+    #             dir_path = sys.argv[2] if len(sys.argv) > 2 else ''
+    #             file_path = "{}{}".format(dir_path, request_path[2])
+    #             if (request[0] == "GET"):
+    #                 try:
+    #                     with open(file_path, 'r') as f:
+    #                         content = f.read()
+    #                     header, response_body = encode_response(content, use_gzip)                        
+    #                     header = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n{header}\r\n"
+    #                 except Exception as e:
+    #                     print(e)
+    #             elif (request[0] == "POST"):
+    #                 content = raw_request.splitlines()[-1]
+    #                 print(f"content: {content}")
+    #                 try:
+    #                     with open(file_path, 'w') as f:
+    #                         f.write(content)
+    #                     header = "HTTP/1.1 201 Created\r\n\r\n"
+    #                 except Exception as e:
+    #                     print(e)
+    #         response = header.encode() + response_body
+    #         print(f"response: {response}")
+    #         client_conn.sendall(response)
+
+    # with ThreadPoolExecutor(max_workers=10) as pool:
+    #     while True:
+    #         client_conn, _ = server_socket.accept()
+    #         pool.submit(handle_client, client_conn)
+
+
+    # task 14
     from concurrent.futures import ThreadPoolExecutor
     import gzip 
 
@@ -402,28 +469,30 @@ def main():
             return header, content
         close_conn = False
         while not close_conn:
-        # with client_conn:
-            raw_request = client_conn.recv(4096).decode()
+            raw_request = client_conn.recv(1024).decode()
             print(f"raw_request: {raw_request}")
             request = raw_request.split(" ")
             request_path = request[1].split("/")
-            header = "HTTP/1.1 404 Not Found\r\n\r\n"
-            response_body = b""
+            
             headers = { n.split(": ")[0]: n.split(": ")[1] for n in raw_request.splitlines()[1:] if ": " in n }
             content_encoding = headers.get('Accept-Encoding')
             content_encoding = [i.strip() for i in content_encoding.split(",")] if content_encoding else []
 
             close_conn = True if headers.get('Connection') == 'close' else False
-            # print(f"content_encoding: {content_encoding}")
+            close_header = "Connection: close\r\n" if close_conn else ""
             use_gzip = True if "gzip" in content_encoding else False
-            if (request[0] == "GET") & (request[1] == "/"):
-                header = "HTTP/1.1 200 OK\r\n\r\n"
-            elif (request[0] == "GET") & (request_path[1] == "echo"):
+            header = f"HTTP/1.1 404 Not Found\r\n{close_header}\r\n"
+            response_body = b""
+
+            print(f"request_path: {request_path}; headers: {headers}; content_encoding: {content_encoding}; close_conn: {close_conn}; use_gzip: {use_gzip}")
+            if (request[0] == "GET") and (request[1] == "/"):
+                header = f"HTTP/1.1 200 OK\r\n{close_header}\r\n"
+            elif (request[0] == "GET") and (request_path[1] == "echo"):
                 header, response_body = encode_response(request_path[2], use_gzip)
-                header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}\r\n"
-            elif (request[0] == "GET") & (request[1] == "/user-agent"):
+                header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}{close_header}\r\n"
+            elif (request[0] == "GET") and (request[1] == "/user-agent"):
                 header, response_body = encode_response(headers['User-Agent'], use_gzip)
-                header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}\r\n"
+                header = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n{header}{close_header}\r\n"
             elif (request_path[1] == "files"):
                 dir_path = sys.argv[2] if len(sys.argv) > 2 else ''
                 file_path = "{}{}".format(dir_path, request_path[2])
@@ -432,7 +501,7 @@ def main():
                         with open(file_path, 'r') as f:
                             content = f.read()
                         header, response_body = encode_response(content, use_gzip)                        
-                        header = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n{header}\r\n"
+                        header = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n{header}{close_header}\r\n"
                     except Exception as e:
                         print(e)
                 elif (request[0] == "POST"):
@@ -441,17 +510,20 @@ def main():
                     try:
                         with open(file_path, 'w') as f:
                             f.write(content)
-                        header = "HTTP/1.1 201 Created\r\n\r\n"
+                        header = f"HTTP/1.1 201 Created\r\n{close_header}\r\n"
                     except Exception as e:
                         print(e)
             response = header.encode() + response_body
+            print(f"header: {header}; response_body: {response_body}")
             print(f"response: {response}")
             client_conn.sendall(response)
+        client_conn.close()
 
     with ThreadPoolExecutor(max_workers=10) as pool:
         while True:
             client_conn, _ = server_socket.accept()
             pool.submit(handle_client, client_conn)
+
 
 if __name__ == "__main__":
     main()
