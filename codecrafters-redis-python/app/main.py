@@ -14,6 +14,10 @@ def main():
     conn, _ = server_socket.accept()
     conn.sendall(b"+PONG\r\n")
 
+    # task 3
+    # respond to multiple pings 
+
+
 
 if __name__ == "__main__":
     main()
