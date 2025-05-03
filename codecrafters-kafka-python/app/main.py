@@ -22,19 +22,43 @@ def main():
     #     server_socket.sendall(data)
 
     # Task 3
-    # request => $ echo -n "00000023001200046f7fc66100096b61666b612d636c69000a6b61666b612d636c6904302e3100" | xxd -r -p | nc localhost 9092 | hexdump -C
-    # response => 00 00 00 00  // message_size:   0 (any value works)
-    #             6f 7f c6 61  // correlation_id: 1870644833
+    # # request => $ echo -n "00000023001200046f7fc66100096b61666b612d636c69000a6b61666b612d636c6904302e3100" | xxd -r -p | nc localhost 9092 | hexdump -C
+    # # response => 00 00 00 00  // message_size:   0 (any value works)
+    # #             6f 7f c6 61  // correlation_id: 1870644833
+    # server_socket, _ = server.accept()
+    # while raw_request := server_socket.recv(1024):
+    #     correlation_id = raw_request[8:12]
+    #     print(f"correlation_id: {correlation_id}")
+    #     correlation_id = int.from_bytes(correlation_id, byteorder="big")
+    #     print(f"correlation_id: {correlation_id}")
+        
+    #     # print(f"raw_request: {raw_request};") # decoded_request: {raw_request.decode()}; raw_request_hex: {raw_request.hex()}; correlation_id: {correlation_id}")
+    #     print(f"raw_request: {raw_request}; raw_request_hex: {raw_request.hex()}; correlation_id: {correlation_id}")
+    #     data = struct.pack(">II", 0, correlation_id)
+    #     print(f"data: {data}")
+    #     server_socket.sendall(data)
+
+    
+    # Task 4
+    # request => $ echo -n "000000230012674a4f74d28b00096b61666b612d636c69000a6b61666b612d636c6904302e3100" | xxd -r -p | nc localhost 9092 | hexdump -C
+    def parse_request(request: bytes): 
+        buff_size = struct.calcsize('>ihhi')
     server_socket, _ = server.accept()
     while raw_request := server_socket.recv(1024):
+        supported_versions = [0, 1, 2, 4]
+        api_version = raw_request[6:8]
+        print(f"api_version: {api_version}")
+        api_version = int.from_bytes(raw_request, byteorder="big")
+        print(f"api_version: {api_version}")
         correlation_id = raw_request[8:12]
         print(f"correlation_id: {correlation_id}")
         correlation_id = int.from_bytes(correlation_id, byteorder="big")
         print(f"correlation_id: {correlation_id}")
         
+
         # print(f"raw_request: {raw_request};") # decoded_request: {raw_request.decode()}; raw_request_hex: {raw_request.hex()}; correlation_id: {correlation_id}")
         print(f"raw_request: {raw_request}; raw_request_hex: {raw_request.hex()}; correlation_id: {correlation_id}")
-        data = struct.pack(">II", 0, correlation_id)
+        data = struct.pack(">IIH", 0, correlation_id, 35) #if api_version not in supported_versions else struct.pack(">II", 0, correlation_id)
         print(f"data: {data}")
         server_socket.sendall(data)
 
